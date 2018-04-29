@@ -3,7 +3,7 @@
     <div v-if="!editing" class="w3-display-container show-container light-grey">
       <div v-if="isLoggedUser" class="edit-button w3-display-topright">
         <div @click="editing = true" class="w3-button w3-large">
-          <i class="fa fa-pencil" aria-hidden="true"></i>
+          <i id="T_editProfileButton" class="fa fa-pencil" aria-hidden="true"></i>
         </div>
       </div>
       <div class="w3-row w3-center">
@@ -61,6 +61,10 @@
         </div>
 
         <app-error-panel
+          :show="errorUploadingFile"
+          :message="errorUploadingFileMsg">
+        </app-error-panel>
+        <app-error-panel
           :show="showImageUpdated"
           message="Image succesfully uploaded. It will be updated once you click 'Accept' below."
           panelType="success">
@@ -75,7 +79,7 @@
         </app-error-panel>
 
         <div class="w3-row">
-          <input v-model.trim="user.username" class="w3-border w3-round w3-hover-light-grey" placeholder="username (unique)" value="">
+          <input id="T_usernameProfileEdit" v-model.trim="user.username" class="w3-border w3-round w3-hover-light-grey" placeholder="username (unique)" value="">
         </div>
         <app-error-panel
           :show="usernameExist"
@@ -91,7 +95,7 @@
         </app-error-panel>
 
         <div class="w3-row w3-margin-top w3-margin-bottom">
-          <textarea v-model="user.shortBio" class="w3-input w3-border w3-round w3-hover-light-grey" rows="4" placeholder="short bio"></textarea>
+          <textarea id="T_bioProfileEdit" v-model="user.shortBio" class="w3-input w3-border w3-round w3-hover-light-grey" rows="4" placeholder="short bio"></textarea>
         </div>
         <app-error-panel
           :show="shortBioTooLarge"
@@ -99,7 +103,7 @@
         </app-error-panel>
 
         <div class="w3-row">
-          <input v-model.trim="user.twitterHandle" @focusout="checkTwitterHandle()"
+          <input  id="T_twitterProfileEdit"  v-model.trim="user.twitterHandle" @focusout="checkTwitterHandle()"
           class="w3-border w3-round w3-hover-light-grey" placeholder="twitter url" value="">
         </div>
         <app-error-panel
@@ -108,7 +112,7 @@
         </app-error-panel>
 
         <div class="w3-row w3-margin-top">
-          <input v-model.trim="user.facebookHandle" @focusout="checkFacebookHandle()"
+          <input  id="T_facebookProfileEdit"  v-model.trim="user.facebookHandle" @focusout="checkFacebookHandle()"
           class="w3-border w3-round w3-hover-light-grey" placeholder="facebook url" value="">
         </div>
         <app-error-panel
@@ -117,7 +121,7 @@
         </app-error-panel>
 
         <div class="w3-row w3-margin-top">
-          <input v-model.trim="user.linkedinHandle" @focusout="checkLinkedinHandle()"
+          <input id="T_linkedinProfileEdit" v-model.trim="user.linkedinHandle" @focusout="checkLinkedinHandle()"
           class="w3-border w3-round w3-hover-light-grey" placeholder="linkedin url" value="">
         </div>
         <app-error-panel
@@ -130,10 +134,10 @@
       <hr>
       <div class="bottom-btns-row w3-row-padding">
         <div class="w3-col m6">
-          <button type="button" class="w3-button app-button-light" @click="cancel()">Cancel</button>
+          <button id="T_buttonCancelProfileEdit" type="button" class="w3-button app-button-light" @click="cancel()">Cancel</button>
         </div>
         <div class="w3-col m6">
-          <button type="button" class="w3-button app-button" @click="accept()">Accept</button>
+          <button  id="T_buttonAcceptProfileEdit" type="button" class="w3-button app-button" @click="accept()">Accept</button>
         </div>
       </div>
     </div>
@@ -162,7 +166,9 @@ export default {
       usernameExist: false,
       twitterLinkOk: true,
       facebookLinkOk: true,
-      linkedinLinkOk: true
+      linkedinLinkOk: true,
+      errorUploadingFile: false,
+      errorUploadingFileMsg: ''
     }
   },
 
@@ -258,12 +264,21 @@ export default {
       }
     },
     newFileSelected (event) {
-      if (event.target.files[0] !== null) {
+      var fileData = event.target.files[0]
+
+      if (fileData !== null) {
+        if (fileData.size > 1048576) {
+          this.errorUploadingFile = true
+          this.errorUploadingFileMsg = 'Image file too big. Must be below 1 MB'
+          return
+        }
+
         var data = new FormData()
-        data.append('file', event.target.files[0])
+        data.append('file', fileData)
 
         this.axios.post('/1/upload/profileImage', data).then((response) => {
           console.log('image uploaded')
+          this.errorUploadingFile = false
           this.showImageUpdated = true
           this.user.useUploadedPicture = true
         })

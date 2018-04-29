@@ -3,7 +3,7 @@
     <td class="avatar-col w3-center">
       <app-user-avatar :user="activity.triggerUser" :showName="false" :small="true"></app-user-avatar>
     </td>
-    <td class="text-div cursor-pointer w3-display-container"
+    <td class="text-div wrap-long cursor-pointer w3-display-container"
       @mouseover="hovering = true"
       @mouseleave="hovering = false"
       @click="clicked = !clicked">
@@ -432,7 +432,7 @@ export default {
       return this.isMessagePosted && (this.activity.modelView !== null)
     },
     isMessageInInitiative () {
-      return false
+      return this.isMessagePosted && (!this.isMessageInView && !this.isMessageInSection && !this.isMessageInCardWrapper)
     },
     isExternalMessage () {
       if (!this.isMessagePosted || !this.showMessages) {

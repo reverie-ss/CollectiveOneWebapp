@@ -1,5 +1,5 @@
 <template lang="html">
-  <div class="w3-display-container">
+  <div class="thread-container w3-display-container">
     <div id="history-container" class="w3-row history-container w3-border">
       <app-activity-getter
         :url="url"
@@ -16,7 +16,7 @@
         @reply-to-message="replyToMessage($event)">
       </app-activity-getter>
     </div>
-    <div class="w3-row w3-margin-top">
+    <div class="w3-row w3-margin-top bottom-container">
       <div v-if="editing" class="">
         <div class="success-panel w3-padding w3-margin-bottom">
           Editing message
@@ -34,6 +34,7 @@
         message="sorry, only members of the initiative can send messages here">
       </app-error-panel>
       <app-markdown-editor
+        class="editor-container"
         v-model="newMessageText"
         placeholder="say something"
         :showToolbar="false"
@@ -124,6 +125,13 @@ export default {
         return false
       }
     },
+    replyingToActivityInInitiative () {
+      if (this.replyingToActivity) {
+        return !this.replyingToActivityInView && !this.replyingToActivityInSection && !this.replyingToActivityInCard
+      } else {
+        return false
+      }
+    },
     replyToMessageContext () {
       if (this.replyingToActivityInCard) {
         return this.replyingToActivity.modelCardWrapper.card.title + ' card'
@@ -133,6 +141,9 @@ export default {
       }
       if (this.replyingToActivityInView) {
         return this.replyingToActivity.modelView.title + ' view'
+      }
+      if (this.replyingToActivityInInitiative) {
+        return this.replyingToActivity.initiative.meta.name + ' initiative'
       }
     }
   },
@@ -186,6 +197,10 @@ export default {
           if (this.replyingToActivityInView) {
             contextType = 'MODEL_VIEW'
             contextElementId = this.replyingToActivity.modelView.id
+          }
+          if (this.replyingToActivityInInitiative) {
+            contextType = 'INITIATIVE'
+            contextElementId = this.replyingToActivity.initiative.id
           }
         }
 
@@ -246,10 +261,21 @@ export default {
 
 <style scoped>
 
+.thread-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 .history-container {
   min-height: 60px;
-  max-height: 50vh;
+  height: calc(100% - 120px);
   overflow: auto;
+  flex-grow: 1;
+}
+
+.bottom-container {
+  flex-grow: 1;
 }
 
 .only-messages-button {
